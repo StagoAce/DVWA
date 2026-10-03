@@ -189,11 +189,21 @@ function &dvwaPageNewGrab() {
 }
 
 
+//function dvwaThemeGet() {
+//	if (isset($_COOKIE['theme'])) {
+//		return $_COOKIE[ 'theme' ];
+//	}
+//	return 'light';
+//}
+
 function dvwaThemeGet() {
-	if (isset($_COOKIE['theme'])) {
-		return $_COOKIE[ 'theme' ];
-	}
-	return 'light';
+    $allowedThemes = ['light', 'dark'];
+
+    if (isset($_COOKIE['theme']) && in_array($_COOKIE['theme'], $allowedThemes, true)) {
+        return $_COOKIE['theme'];
+    }
+
+    return 'light';
 }
 
 
@@ -403,7 +413,7 @@ function dvwaHtmlEcho( $pPage ) {
 
 	</head>
 
-	<body class=\"home " . dvwaThemeGet() . "\">
+	<body class=\"home " . htmlspecialchars(dvwaThemeGet(), ENT_QUOTES, 'UTF-8') . "\">
 		<div id=\"container\">
 
 			<div id=\"header\">

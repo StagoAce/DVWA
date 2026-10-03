@@ -2,13 +2,15 @@
 
 if( isset( $_GET[ 'Submit' ] ) ) {
 	// Get input
-	$id = $_GET[ 'id' ];
+	// $id = $_GET[ 'id' ];
+	$id = intval[$_GET['id']]; //get input y se sanitiza a solo parametros integer
 	$exists = false;
 
 	switch ($_DVWA['SQLI_DB']) {
 		case MYSQL:
 			// Check database
-			$query  = "SELECT first_name, last_name FROM users WHERE user_id = '$id';";
+			// $query  = "SELECT first_name, last_name FROM users WHERE user_id = '$id';";
+			$query  = "SELECT first_name, last_name FROM users WHERE user_id = '" . mysql_real_escape_string($id) . "';";
 			try {
 				$result = mysqli_query($GLOBALS["___mysqli_ston"],  $query ); // Removed 'or die' to suppress mysql errors
 			} catch (Exception $e) {
@@ -29,14 +31,24 @@ if( isset( $_GET[ 'Submit' ] ) ) {
 		case SQLITE:
 			global $sqlite_db_connection;
 
-			$query  = "SELECT first_name, last_name FROM users WHERE user_id = '$id';";
+			//$query  = "SELECT first_name, last_name FROM users WHERE user_id = '" . mysql_real_escape_string($id) . "';";
 			try {
-				$results = $sqlite_db_connection->query($query);
-				$row = $results->fetchArray();
-				$exists = $row !== false;
-			} catch(Exception $e) {
-				$exists = false;
-			}
+				//SE modifica la consulta para que la entrada sea indirecta
+        			$stmt = $sqlite_db_connection->prepare(
+            				"SELECT first_name, last_name FROM users WHERE user_id = :id"
+        			);
+
+				// se reemplaza el id y se le dice que el parametro es integer
+
+	        		$stmt->bindValue(':id', $id, SQLITE3_INTEGER);
+
+        			$results = $stmt->execute();
+        			$row = $results->fetchArray(SQLITE3_ASSOC);
+
+        			$exists = $row !== false;
+    			} catch (Exception $e) {
+        			$exists = false;
+    			}
 
 			break;
 	}

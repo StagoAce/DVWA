@@ -8,23 +8,27 @@ if( isset( $_POST[ 'Submit' ]  ) ) {
 	$substitutions = array(
 		'&&' => '',
 		';'  => '',
+		' '  => '',
 	);
 
+	if (!filter_var($target, FILTER_VALIDATE_IP)) {
+		$html .= "<pre> IP invalida </pre>";
+	}
 	// Remove any of the characters in the array (blacklist).
 	$target = str_replace( array_keys( $substitutions ), $substitutions, $target );
 
 	// Determine OS and execute the ping command.
 	if( stristr( php_uname( 's' ), 'Windows NT' ) ) {
 		// Windows
-		$cmd = shell_exec( 'ping  ' . $target );
+		$cmd = shell_exec( 'ping  ' . scapeshellarg($target));
 	}
 	else {
 		// *nix
-		$cmd = shell_exec( 'ping  -c 4 ' . $target );
+		$cmd = shell_exec( 'ping  -c 4 ' . scapeshellarg($target) );
 	}
 
 	// Feedback for the end user
-	$html .= "<pre>{$cmd}</pre>";
+	$html .= '<pre>' .htmlspecialchars($cmd, ENT_QUOTES, 'UTF-8') . '</pre>';
 }
 
 ?>
